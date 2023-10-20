@@ -50,22 +50,21 @@ const server = http.createServer((req, res) => {
       });
 
       // Створюємо початок XML-відповіді з обгорненим <data> елементом
-      let xmlResponse = '<?xml version="1.0" encoding="UTF-8"?>\n<data>';
+      const xmlResponse = {
+        data: {
+          indicators: filteredData.map(item => ({
+            txt: item.txt,
+            value: item.value
+          }))
+        }
+      };
 
-      // Оброблюємо кожен обраний елемент та створюємо відповідну структуру XML в середині <data>
-      for (const item of filteredData) {
-        xmlResponse += '\n  <indicators>';
-        xmlResponse += `\n    <txt>${item.txt}</txt>`;
-        xmlResponse += `\n    <value>${item.value}</value>`;
-        xmlResponse += '\n  </indicators>';
-      }
-
-      // Завершуємо XML-структуру, включаючи закриваючий </data> елемент
-      xmlResponse += '\n</data>';
+      // Генеруємо XML-документ з вхідних даних за допомогою XMLBuilder
+      const xmlString = XMLBuilder(xmlResponse);
 
       // Відправляємо XML-відповідь зі статусом 200 (OK)
       res.writeHead(200, { 'Content-Type': 'text/xml' });
-      res.end(xmlResponse);
+      res.end(xmlString);
     } else {
       // Якщо дані некоректні, встановлюємо статус 500 (Internal Server Error) і надсилаємо відповідь "Invalid XML Data"
       res.statusCode = 500;
